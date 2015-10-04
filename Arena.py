@@ -1,5 +1,6 @@
 from Tkinter import *
 import itertools
+from Board import *
 
 arena = None
     
@@ -8,46 +9,77 @@ class Arena(Frame):
 
     def __init__(self, parent, puz, width=750, height=750, **options):
         Frame.__init__(self, parent, **options)
+        self.parent = parent
         self.width, self.height = width, height
         self.canvas = Canvas(self, width=width, height=height)
         self.canvas.pack()
-	
-	self.n = puz.size
-	self.puz = puz
+    	
+    	self.n = puz.size
+    	self.puz = puz
 	
         parent.title("Flow Solver - Shiv Pande")
         Button(self, text='trunks', command=self.trunks).pack(side=LEFT)
         Button(self, text='brute', command=self.brute).pack(side=LEFT)
         Button(self, text='quit', command=parent.quit).pack(side=LEFT)
         Button(self, text='reset', command=self.reset).pack(side=LEFT)
+        Button(self, text='prev', command=self.loadprev).pack(side=LEFT)
+        Button(self, text='next', command=self.loadnext).pack(side=LEFT)
         
-	self.colordict = {'*':'white',
-			  'A':'red',#red
-			  'B':'#009900',#dark green
-			  'C':'blue',#blue
-			  'D':'yellow',#yellow
-			  'E':'orange',#orange
-			  'F':'#8FD8D8',#light blue
-			  'G':'#FF0099',#pink
-			  'H':'#5E2605',#brown
-			  'I':'#9900CC',#purple
-			  'J':'#A8A8A8',#white
-			  'K':'#585858',#dark grey
-			  'L':'#66FF66',#lime green
-			  'M':'#999900',#dirty yellow
-			  'N':'#000099',#navy
-			  'O':'#00FFFF',#cyan
-			  'P':'#FF66FF'}#hot pink
+    	self.colordict = {'*':'white',
+    			  'A':'red',#red
+    			  'B':'#009900',#dark green
+    			  'C':'blue',#blue
+    			  'D':'yellow',#yellow
+    			  'E':'orange',#orange
+    			  'F':'#8FD8D8',#light blue
+    			  'G':'#FF0099',#pink
+    			  'H':'#5E2605',#brown
+    			  'I':'#9900CC',#purple
+    			  'J':'#A8A8A8',#white
+    			  'K':'#585858',#dark grey
+    			  'L':'#66FF66',#lime green
+    			  'M':'#999900',#dirty yellow
+    			  'N':'#000099',#navy
+    			  'O':'#00FFFF',#cyan
+    			  'P':'#FF66FF'}#hot pink
 
-	self.updateArena()
+        self.colortostring = {'*':'white',
+                  'A':'red',#red
+                  'B':'dark green',#dark green
+                  'C':'blue',#blue
+                  'D':'yellow',#yellow
+                  'E':'orange',#orange
+                  'F':'light blue',#light blue
+                  'G':'pink',#pink
+                  'H':'brown',#brown
+                  'I':'purple',#purple
+                  'J':'white',#white
+                  'K':'dark grey',#dark grey
+                  'L':'lime green',#lime green
+                  'M':'dirty yellow',#dirty yellow
+                  'N':'navy',#navy
+                  'O':'cyan',#cyan
+                  'P':'hot pink'}#hot pink
+
+    	self.updateArena()
 
     def trunks(self):
-	self.puz.fillrequiredcorners('trunk')
-	self.puz.developTrunks()
-	self.updateArena()
-	f=sorted(self.puz.remainingcolors)
-	if not f: f = "None, This level has been solved!"
-        #self.colsrem.set(f)
+    	self.puz.fillrequiredcorners('trunk')
+    	self.puz.developTrunks()
+    	self.updateArena()
+    	f=sorted(self.puz.remainingcolors)
+    	if not f: f = "None, This level has been solved!"
+            #self.colsrem.set(f)
+
+    def loadprev(self):
+        self.loadboard(self.puz.boardnum-1)
+
+    def loadnext(self):
+        self.loadboard(self.puz.boardnum+1)
+
+    def loadboard(self, boardnum):
+        self.puz = Board(self.puz.infile, boardnum)
+        self.reset()
 
     def getpaths(self, grid, start, end, maxdistance = float("Inf")):
         
@@ -122,7 +154,7 @@ class Arena(Frame):
 
     def solveit(self,board):
         emptytiles = board.getallempty()
-        #print 'empty tiles: ', emptytiles
+        print 'empty tiles: ', emptytiles
         allpaths = [] #list of getallpaths for each color. paths[i] corresponds to getallpaths for board.remainingcolors[i]
         
         grid = []
@@ -153,10 +185,10 @@ class Arena(Frame):
             colpaths = self.getpaths(grid, (coline.trunk1.row,coline.trunk1.col) , (coline.trunk2.row,coline.trunk2.col), maxdists[col])
             if len(colpaths) == 0: print 'this level cant be solved because this color has no path to the goal: ', col
             allpaths.append(colpaths)
-            print 'all paths found for color: ', col
+            print 'all paths found for color: \t%d \t%s' % (len(allpaths[board.remainingcolors.index(col)]), self.colortostring[col])
 
-        for col in board.remainingcolors:
-            print 'color: ', col, '  numpaths: ', len(allpaths[board.remainingcolors.index(col)])
+        #for col in board.remainingcolors:
+        #    print 'color: ', col, '  numpaths: ', len(allpaths[board.remainingcolors.index(col)])
 
         
         count = 1
@@ -170,7 +202,7 @@ class Arena(Frame):
         print 'found all possible paths for each color, now we will have to try up to %s different combos of them' % "{:,}".format(numpermutations)
         for item in itertools.product(*allpaths):
             if (count % 100000) == 0:
-                print '%d of %d' % (count, numpermutations)
+                print '%f percent: %s of %s' % (float(count)/float(numpermutations)*100.0, "{:,}".format(count), "{:,}".format(numpermutations))
             count+=1
             if self.issolved(list(emptytiles), item):
                 #we found a solution, time to finalize the board
