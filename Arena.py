@@ -7,7 +7,7 @@ arena = None
 class Arena(Frame):
     """This class provides the user interface for an arena of turtles."""
 
-    def __init__(self, parent, puz, width=750, height=750, **options):
+    def __init__(self, parent, puz, width=900   , height=900   , **options):
         Frame.__init__(self, parent, **options)
         self.parent = parent
         self.width, self.height = width, height
