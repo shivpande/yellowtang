@@ -1,0 +1,30 @@
+yellowtang
+
+
+
+if the lengths of paths doesnt sum to the num of empty spaces, disregard it
+
+how to score board?
+
+if the goals are diagonal, will the soln always be one of the two one-length paths
+if two trunk heads are one away and they both lie on the same wall, they should connect
+if the current position is in the adjacent list of three nodes ago, score low because it loops around
+Order such that ones that ride along walls are better
+
+Higher scores for paths that have less turns
+
+If there's only one in between the two trunks, will you always instantly connect
+
+
+
+The four adj tiles around the bridge are part of the bridge 
+
+
+
+#check new set of required trunks (ex. corner in lvl17x6) #check possible blockage (lvl13x6)
+ 
+how hard to make compatible with bridges?
+highly parallelizable - path finding, set/cover
+ 
+when finding paths, make sure path doesnt block any other trunk's paths. do this by listing for each trunk the possible next moves, and if none of these next moves are available with this path, don't use the path. 
+
